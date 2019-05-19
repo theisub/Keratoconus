@@ -19,7 +19,7 @@ def write_func(a):
         i=0
         for item in a:
                 if i == 0:
-                        output += str(item) 
+                        output += "0" 
                 else:
                         output +='+(' + str(item) +')' + 'x^' + str(i)
                 i += 1
@@ -44,7 +44,21 @@ def fn(x, a):
 	px = 0
 	for index in range(0, np.size(a)):
 		px += (a[index] * (x**index))	# evaluate the P(x)
+                
+        
 	return px
+
+def PrepareXY(x,y,max_x,max_y):
+        if max_x >= 0:
+            x = x - max_x - 0.0231
+        elif max_x < 0:
+            x = x + (max_x*-1) - 0.0231
+        
+        if max_y >= 0:
+            y = y - max_y + 0.0009
+        elif max_y < 0:
+            y = y + (max_y*-1) + 0.0009
+        return x,y 
 
 def filterPoints(check,arc_x,arc_y):
         result = []
@@ -218,12 +232,21 @@ def GetLeastSquares(x,y,n):
         error = find_error(y, np.array(fn(x, a)))	# determine the error of P(x)
         print("\nE =",error)
 
-        print(write_func(a))
+        #print(write_func(a))
         #plt.scatter(x_arc,y_arc,linewidth=2)
         #plt.scatter(x_arc_right,y_arc_right,linewidth=2)
         print(x)
         a = np.concatenate(a)
-        return a
+        a[0]=0
+        print(write_func(a))
+        x_plot = np.arange(-1,1,0.0001) # this is disgusting, but it works for now
+        y_plot = fn(x_plot,a)
+        plt.plot(x_plot,y_plot,color='red')
+        max_y = max(y_plot)
+        max_x = x_plot[y_plot.argmax()]
+
+        plt.show()
+        return a, max_x, max_y
 
 
 
@@ -345,7 +368,7 @@ if __name__ == "__main__":
         #plt.scatter(x_arc_right,y_arc_right,linewidth=2)
         print(x)
         #np.savetxt('avals.csv', (x),delimiter=',')
-
+                
         #ЭТО ПАРАМЕТРЫ ДЛЯ IV.png
         a2 = [9.906912226779940323e-01,
         3.615391585427219501e-01,

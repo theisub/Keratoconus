@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Learning import GetThresholdImage,GetContours, PrepareContoursForArc, GetArc, GetLeastSquares
+from Learning import GetThresholdImage,GetContours, PrepareContoursForArc, GetArc, GetLeastSquares, PrepareXY
 from Classification import ClassifyStage
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -46,6 +46,7 @@ class Ui_MainWindow(object):
         self.OriginalImage.setText(_translate("MainWindow", "TextLabel"))
         self.NewImage.setText(_translate("MainWindow", "TextLabel"))
 
+    
     def importImage(self,MainWindow):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(None,"Выберите изображение","", "Image Files (*.png *.jpg *.jpeg *.bmp)")
         if filename:
@@ -65,7 +66,9 @@ class Ui_MainWindow(object):
         x,y,xy = PrepareContoursForArc(contours)
         arc_x, arc_y = GetArc(x,y,xy)
         n = 8 # polynomial degree
-        a = GetLeastSquares(arc_x,arc_y,n)
+        _, max_x,max_y = GetLeastSquares(arc_x,arc_y,n)
+        arc_x,arc_y = PrepareXY(arc_x,arc_y,max_x,max_y)
+        a,_,_ = GetLeastSquares(arc_x,arc_y,n)
         a=a[1:]
         ClassifyStage(a)
         print(a)
