@@ -17,9 +17,9 @@
    <widget class="QPushButton" name="selectImgBtn">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>120</y>
-      <width>101</width>
+      <x>30</x>
+      <y>20</y>
+      <width>121</width>
       <height>41</height>
      </rect>
     </property>
@@ -57,6 +57,57 @@
     </property>
     <property name="text">
      <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="RadarChartBtn">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>470</y>
+      <width>121</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Диаграмма стадий 
+пациента</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="MoreAboutResultsBtn">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>400</y>
+      <width>121</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Подробнее о
+результатах</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="resultsText">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>181</width>
+      <height>201</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ResultsLabel">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>160</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Результат диагностики:</string>
     </property>
    </widget>
   </widget>

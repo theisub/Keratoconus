@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\Basem\Documents\Test1\MainWindow.ui'
+# Form implementation generated from reading ui file 'C:\Users\Basem\source\repos\KeratokonusGit\MainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Learning import GetThresholdImage,GetContours, PrepareContoursForArc, GetArc, GetLeastSquares, PrepareXY
-from TestingChart import SetupPlot
-from Classification import ClassifyStage, CountOccasions
-import numpy as np
-import os.path
 
-counter = np.zeros(shape=(2,2),dtype=int)
-stages_filenames = {'Normal':[],'I':[],'II':[],'III':[],'IV':[]}
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -43,7 +36,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        self.selectImgBtn.clicked.connect(self.importImage)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -51,60 +43,6 @@ class Ui_MainWindow(object):
         self.selectImgBtn.setText(_translate("MainWindow", "Выбрать снимок"))
         self.OriginalImage.setText(_translate("MainWindow", "TextLabel"))
         self.NewImage.setText(_translate("MainWindow", "TextLabel"))
-
-    
-    def importImage(self,MainWindow):
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(None,"Выберите изображение","", "Image Files (*.png *.jpg *.jpeg *.bmp)")
-        if filename:
-            pixmap = QtGui.QPixmap(filename)
-            pixmap = pixmap.scaled(self.OriginalImage.width(), self.OriginalImage.height(), QtCore.Qt.KeepAspectRatio)
-            self.OriginalImage.setPixmap(pixmap)
-            self.OriginalImage.setAlignment(QtCore.Qt.AlignCenter)
-        threshold_img, original_img = GetThresholdImage(filename)
-        newpixmap, contours =  GetContours(threshold_img,original_img)
-        #newpixmap =  QtGui.QPixmap('Ik.png')
-        h,w,channel = newpixmap.shape
-        bytesPerLine =  3 * w
-        qImg = QtGui.QImage(newpixmap.data,w,h,bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
-        pixmap01= QtGui.QPixmap.fromImage(qImg)
-        self.NewImage.setPixmap(pixmap01)
-        self.NewImage.setAlignment(QtCore.Qt.AlignCenter)
-        x,y,xy = PrepareContoursForArc(contours)
-        arc_x, arc_y = GetArc(x,y,xy)
-        n = 8 # polynomial degree
-        _, max_x,max_y = GetLeastSquares(arc_x,arc_y,n)
-        arc_x,arc_y = PrepareXY(arc_x,arc_y,max_x,max_y)
-        a,_,_ = GetLeastSquares(arc_x,arc_y,n)
-        a=a[1:]
- 
-        
-        knn_count, forest_count = ClassifyStage(a)
-
-        filena = os.path.basename(filename)
-        for item in knn_count:
-            if item == 'N':
-                counter[0][0] = counter[0][0] + 1
-                stages_filenames['Normal'].append(os.path.basename(filename))
-            if item == 'I':
-                counter[0][1] = counter[0][1] + 1
-                stages_filenames['I'].append(os.path.basename(filename))
-    
-        for item in forest_count:
-            if item == 'N':
-                counter[1][0] = counter[1][0] + 1
-            if item == 'I':
-                counter[1][1] = counter[1][1] + 1
-        
-        
-        print('На основе снимков пациент ')
-
-
-
-        
-        SetupPlot(counter,0)
-        print(a)
-
-
 
 if __name__ == "__main__":
     import sys
@@ -114,4 +52,5 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
 
