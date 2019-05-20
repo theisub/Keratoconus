@@ -8,7 +8,13 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Learning import GetThresholdImage,GetContours, PrepareContoursForArc, GetArc, GetLeastSquares, PrepareXY
-from Classification import ClassifyStage
+from TestingChart import SetupPlot
+from Classification import ClassifyStage, CountOccasions
+import numpy as np
+import os.path
+
+counter = np.zeros(shape=(2,2),dtype=int)
+stages_filenames = {'Normal':[],'I':[],'II':[],'III':[],'IV':[]}
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -70,7 +76,32 @@ class Ui_MainWindow(object):
         arc_x,arc_y = PrepareXY(arc_x,arc_y,max_x,max_y)
         a,_,_ = GetLeastSquares(arc_x,arc_y,n)
         a=a[1:]
-        ClassifyStage(a)
+ 
+        
+        knn_count, forest_count = ClassifyStage(a)
+
+        filena = os.path.basename(filename)
+        for item in knn_count:
+            if item == 'N':
+                counter[0][0] = counter[0][0] + 1
+                stages_filenames['Normal'].append(os.path.basename(filename))
+            if item == 'I':
+                counter[0][1] = counter[0][1] + 1
+                stages_filenames['I'].append(os.path.basename(filename))
+    
+        for item in forest_count:
+            if item == 'N':
+                counter[1][0] = counter[1][0] + 1
+            if item == 'I':
+                counter[1][1] = counter[1][1] + 1
+        
+        
+        print('На основе снимков пациент ')
+
+
+
+        
+        SetupPlot(counter,0)
         print(a)
 
 

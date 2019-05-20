@@ -8,6 +8,26 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report, confusion_matrix 
 from sklearn.ensemble import RandomForestClassifier 
 
+def CountOccasions(counter, knn_counter, forest_counter):
+    
+    for item in knn_counter:
+        if item == 'N':
+             counter[0][0] = counter[0][0] + 1
+        if item == 'I':
+            counter[0][1] = counter[0][1] + 1
+    
+    for item in forest_counter:
+        if item == 'N':
+             counter[1][0] = counter[1][0] + 1
+        if item == 'I':
+            counter[1][1] = counter[1][1] + 1
+
+    return counter
+
+        
+            
+    
+
 
 
 def ClassifyStage(a):
@@ -54,6 +74,8 @@ def ClassifyStage(a):
     predicted=classifier.predict(X_test) 
 
     print('Лес думает' + predicted)
+
+    return y_pred, predicted
 
 
 
