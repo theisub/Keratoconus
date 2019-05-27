@@ -99,16 +99,13 @@ if __name__ == "__main__":
     y = dataset.iloc[:, 8].values  #:,8
     #y = dataset.iloc[:, 4].values
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)  
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)  
 
     scaler = StandardScaler()  
     scaler.fit(X_train)
 
     X_train = scaler.transform(X_train)  
     X_test = scaler.transform(X_test)  
-    X_test = X_test[0]
-    X_test = X_test.reshape(1,-1)
-
 
     classifier = KNeighborsClassifier(n_neighbors=5)  
     classifier.fit(X_train, y_train)  
@@ -116,25 +113,25 @@ if __name__ == "__main__":
     y_pred = classifier.predict(X_test)  
 
 
-    #print(confusion_matrix(y_test, y_pred))  
-    #print(classification_report(y_test, y_pred))  
-    #print ('Accuracy Score :',accuracy_score(y_test[0], y_pred)) 
-    print('It is '+y_test[0])
-    print('kNN thinks it it ' + y_pred)
+    print(confusion_matrix(y_test, y_pred))  
+    print(classification_report(y_test, y_pred))  
+    print ('Accuracy Score :',accuracy_score(y_test, y_pred)) 
+    print('It is '+y_test)
+    #print('kNN thinks it it ' + y_pred)
 
     print("TEPER FOREST")
 
     #Using the random forest classifier for the prediction 
-    classifier=RandomForestClassifier() 
+    classifier=RandomForestClassifier(n_estimators=100) 
     classifier=classifier.fit(X_train,y_train) 
     predicted=classifier.predict(X_test) 
 
-    print('forest thinks it it ' + predicted)
-    ClassifyStage('ul')
+    #print('forest thinks it it ' + predicted)
+    #ClassifyStage('ul')
 
     #printing the results 
-    #print ('Confusion Matrix :') 
-    #print(confusion_matrix(y_test, predicted)) 
-    #print ('Accuracy Score :',accuracy_score(y_test, predicted)) 
-    #print ('Report : ') 
-    #print (classification_report(y_test, predicted)) 
+    print ('Confusion Matrix :') 
+    print(confusion_matrix(y_test, predicted)) 
+    print ('Accuracy Score :',accuracy_score(y_test, predicted)) 
+    print ('Report : ') 
+    print (classification_report(y_test, predicted)) 
