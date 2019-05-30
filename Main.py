@@ -9,6 +9,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from MoreResult import Ui_ResultWindow
 from Learning import GetThresholdImage,GetContours, PrepareContoursForArc, GetArc, GetLeastSquares, PrepareXY
+from testtf import GetROI
 from TestingChart import SetupPlot
 from Classification import ClassifyStage, CountOccasions
 import numpy as np
@@ -99,12 +100,14 @@ class Ui_MainWindow(object):
     
     def importImage(self,MainWindow):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(None,"Выберите изображение","", "Image Files (*.png *.jpg *.jpeg *.bmp)")
+        tempfile = 'currentroi.jpg'
         if filename:
             pixmap = QtGui.QPixmap(filename)
             pixmap = pixmap.scaled(self.OriginalImage.width(), self.OriginalImage.height(), QtCore.Qt.KeepAspectRatio)
             self.OriginalImage.setPixmap(pixmap)
             self.OriginalImage.setAlignment(QtCore.Qt.AlignCenter)
-        threshold_img, original_img = GetThresholdImage(filename)
+        filename,tempfile = GetROI(filename, tempfile)
+        threshold_img, original_img = GetThresholdImage(tempfile)
         newpixmap, contours =  GetContours(threshold_img,original_img)
         #newpixmap =  QtGui.QPixmap('Ik.png')
         h,w,channel = newpixmap.shape

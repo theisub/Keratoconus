@@ -206,10 +206,25 @@ def PrepareContoursForArc(contours):
         return x,y,xy
 
 def GetArc(x,y,xy):
+        middle = int(max(x)/2)
+        left_border = np.argmax(x>middle-int(middle/2))
+        right_border = len(x) - np.argmax(x[::-1]<middle+int(middle/2))
+        maxxx = np.argmax(x[left_border:right_border])
+        maxpos = np.argmax(y[left_border:right_border])+left_border
+        test1 = np.argmax(x)
+        test2 = np.argmax(y)
+        lul = y[maxpos:len(y)]
+        plt.scatter(x,y, color = 'Black')
+        plt.scatter(x[left_border:right_border],y[left_border:right_border],color='Green')
+        plt.show()
+        nextmaxpos = np.argmax(y[maxpos+1:right_border])+maxpos+1
+        '''
+        иначе с учетом краев
         maxxx = np.argmax(x)
         maxpos = np.argmax(y)
         lul = y[maxpos:len(y)]
         nextmaxpos = np.argmax(y[maxpos+1:len(y)])+maxpos+1
+        '''
         #левая часть
         index = createArc(maxpos,x,y,xy)
         x_arc = np.array([])
@@ -235,7 +250,7 @@ def GetArc(x,y,xy):
 
         arc_x = np.concatenate((x_arc[::-1],x_arc_right))
         arc_y = np.concatenate((y_arc[::-1],y_arc_right))
-        #plt.scatter(x,y,linewidth=1)
+        #plt.scatter(x,y,linewidth=4)
 
         if len(arc_x)%2 != 0:
                 arc_x = np.append(arc_x,arc_x[len(arc_x)-1])
@@ -244,7 +259,7 @@ def GetArc(x,y,xy):
         x = np.interp(arc_x,(arc_x.min(),arc_x.max()), (-1,+1))
         y = np.interp(arc_y,(arc_y.min(),arc_y.max()), (-1,+1))
 
-        plt.scatter(x,y)
+        plt.scatter(x,y, color = 'Red')
         plt.show()
         return x,y
 
@@ -267,6 +282,9 @@ def GetLeastSquares(x,y,n):
         print(write_func(a))
         x_plot = np.arange(-1,1,0.0001) # this is disgusting, but it works for now
         y_plot = fn(x_plot,a)
+        x_plot = np.interp(x_plot,(x_plot.min(),x_plot.max()), (-1,+1))
+        y_plot = np.interp(y_plot,(y_plot.min(),y_plot.max()), (-1,+1))
+        plt.scatter(x,y,color='blue')
         plt.plot(x_plot,y_plot,color='red')
         max_y = max(y_plot)
         max_x = x_plot[y_plot.argmax()]
@@ -315,6 +333,7 @@ if __name__ == "__main__":
         y_short = y[0:400]
 
         maxxx = np.argmax(x)
+
         maxpos = np.argmax(y)
         lul = y[maxpos:len(y)]
         nextmaxpos = np.argmax(y[maxpos+1:len(y)])+maxpos+1
