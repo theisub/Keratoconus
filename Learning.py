@@ -7,6 +7,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from scipy.stats.stats import pearsonr
 import csv
+from scipy.interpolate import CubicSpline
 def calculate_slopes(x1,y1,x2,y2):
         
         if (x2-x1) != 0:
@@ -203,6 +204,8 @@ def PrepareContoursForArc(contours):
         y = np.amax(y) - y
         plt.scatter(x,y,linewidth=1)
         plt.show()
+        np.savetxt('xvals.csv', (x),delimiter=',')
+        np.savetxt('yvals.csv', (y),delimiter=',')
         return x,y,xy
 
 def GetArc(x,y,xy):
@@ -437,7 +440,10 @@ if __name__ == "__main__":
         x = x[:len(x2)]
         '''
         #plt.plot(x2.astype(float),fn(x2.astype(float), a2),color='orange')
+        cs = CubicSpline(x,y)
+
         plt.plot(x,fn(x, a),color='red')
+        plt.plot(x,cs(x),color='green')
         cv.imshow('Contours', img)
         plt.show()
         #print(pearsonr(fn(x,a),fn(x2.astype(float),a2)))
