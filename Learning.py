@@ -283,6 +283,8 @@ def GetLeastSquares(x,y,n):
         a = np.concatenate(a)
         a[0]=0
         print(write_func(a))
+        for item in a:
+                print(item,end=',',flush=True)
         x_plot = np.arange(-1,1,0.0001) # this is disgusting, but it works for now
         y_plot = fn(x_plot,a)
         x_plot = np.interp(x_plot,(x_plot.min(),x_plot.max()), (-1,+1))

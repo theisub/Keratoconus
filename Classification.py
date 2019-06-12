@@ -30,13 +30,13 @@ def CountOccasions(counter, knn_counter, forest_counter):
 
 
 
-def ClassifyStage(a):
+def ClassifyStage(a,filename):
     names = ['coef1','coef2','coef3','coef4','coef5','coef6','coef7','coef8','Class']
 
     #names = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'Class']
 
     # Read dataset to pandas dataframe
-    dataset = pd.read_csv('Kerato.csv', names=names)  
+    dataset = pd.read_csv(filename, names=names)  
     #dataset = pd.read_csv(url,names=names)
     print(dataset.head())
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     #names = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'Class']
 
     # Read dataset to pandas dataframe
-    dataset = pd.read_csv('Kerato.csv', names=names)  
+    dataset = pd.read_csv('KeratoStages.csv', names=names)  
     #dataset = pd.read_csv(url,names=names)
     print(dataset.head())
 
@@ -108,83 +108,70 @@ if __name__ == "__main__":
 
     X_train = scaler.transform(X_train)  
     X_test = scaler.transform(X_test)  
+    for i in range(1,100):
+        classifier = KNeighborsClassifier(n_neighbors=5)  
+        classifier.fit(X_train, y_train)  
 
-    classifier = KNeighborsClassifier(n_neighbors=5)  
-    classifier.fit(X_train, y_train)  
+        y_pred = classifier.predict(X_test)  
 
-    y_pred = classifier.predict(X_test)  
+        avgknn = np.append(avgknn,accuracy_score(y_test, y_pred))
 
-    avgknn = np.append(rocvalues,accuracy_score(y_test, y_pred))
+        #print(confusion_matrix(y_test, y_pred))  
+        #print(classification_report(y_test, y_pred))  
+        #print ('Accuracy Score :',accuracy_score(y_test, y_pred)) 
+        #print('It is '+y_test)
+        #print('kNN thinks it it ' + y_pred)
 
-    #print(confusion_matrix(y_test, y_pred))  
-    #print(classification_report(y_test, y_pred))  
-    #print ('Accuracy Score :',accuracy_score(y_test, y_pred)) 
-    #print('It is '+y_test)
-    #print('kNN thinks it it ' + y_pred)
+        #print("TEPER FOREST")
+        #Using the random forest classifier for the prediction 
 
-    #print("TEPER FOREST")
+        # Print the feature ranking
+        #print("Feature ranking:")
 
-    #Using the random forest classifier for the prediction
-    train_results = []
-    test_results = []
-    modval = []
-    #n_estimators = [1, 2, 4, 8, 16, 25, 32, 45, 56,64,80, 100, 120]
-    for estimators in range(1,101):
-        classifier=RandomForestClassifier(n_estimators=estimators,n_jobs=-1) 
+        #for f in range(X.shape[1]):
+         #   print("%d. feature %d (%f)" % (f + 1, indices[f]-1, importances[indices[f]-1]))
+
+        # Plot the feature importances of the forest
+        #plt.figure()
+        #plt.title("Значимость коэффициентов при классификации")
+        #plt.bar(range(X.shape[1]), importances[indices-1],
+         #   color="r", yerr=std[indices-1]/2, align="center")
+        #plt.xticks(range(X.shape[1]), indices)
+        #plt.xlim([-1, X.shape[1]])
+        #plt.show()
+        classifier=RandomForestClassifier(n_estimators=100) 
         classifier=classifier.fit(X_train,y_train) 
-
-        train_pred = classifier.predict(X_train)
-
-        false_positive_rate, true_positive_rate, thresholds = roc_curve(y_train, train_pred)
-        roc_auc = auc(false_positive_rate, true_positive_rate)
-        if estimators % 5 == 0 and estimators != 0:
-            train_results.append(roc_auc)
+        predicted=classifier.predict(X_test) 
+        #print ('Accuracy Score :',accuracy_score(y_test, predicted)) 
+        avgforest = np.append(avgforest,accuracy_score(y_test, predicted))
+        #print ('Report : ') 
+        print (classification_report(y_test, predicted)) 
         
+        #rocvalues = np.append(rocvalues,metrics.roc_curve(y_test,predicted,pos_label=2))
+        #print('forest thinks it it ' + predicted)
+        #ClassifyStage('ul')
 
-        y_pred = classifier.predict(X_test)
+        #printing the results 
+        #print ('Confusion Matrix :') 
+        #print(confusion_matrix(y_test, predicted)) 
+        #print ('Accuracy Score :',accuracy_score(y_test, predicted)) 
+        #print ('Report : ') 
+        #print (classification_report(y_test, predicted)) 
 
+        from sklearn.svm import SVC
+        from sklearn.ensemble import AdaBoostClassifier
 
-        false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
-        roc_auc = auc(false_positive_rate, true_positive_rate)
-        test_results.append(roc_auc)
-        if estimators % 5 == 0 and estimators != 0:
-            modval.append(np.average(test_results[estimators-4:estimators]))
-        rocvalues.append(roc_auc)
-        #avgforest = np.append(rocvalues,accuracy_score(y_test, predicted))
-    from matplotlib import pyplot as plt
-    from matplotlib.legend_handler import HandlerLine2D
-    line1, = plt.plot(range(1,101,5), train_results, 'b', label='Точность классификации в обучающей выборке')
-    line2, = plt.plot(range(1,100,5), modval, 'r', label='Точность классификации в тестовой выборке')
-    plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
-    plt.ylabel('Точность классификации')
-    plt.xlabel('Количество деревьев')
-    plt.show()
-    
-    #rocvalues = np.append(rocvalues,metrics.roc_curve(y_test,predicted,pos_label=2))
-    #print('forest thinks it it ' + predicted)
-    #ClassifyStage('ul')
+        #print("TEPER SVC")
+        classifier = SVC(gamma='auto')
+        classifier = classifier.fit(X_train,y_train) 
+        predicted = classifier.predict(X_test) 
+        
+        avgsvm = np.append(avgsvm,accuracy_score(y_test, predicted))
 
-    #printing the results 
-    #print ('Confusion Matrix :') 
-    #print(confusion_matrix(y_test, predicted)) 
-    #print ('Accuracy Score :',accuracy_score(y_test, predicted)) 
-    #print ('Report : ') 
-    #print (classification_report(y_test, predicted)) 
-
-    from sklearn.svm import SVC
-    from sklearn.ensemble import AdaBoostClassifier
-
-    #print("TEPER SVC")
-    classifier = SVC(gamma='auto')
-    classifier = classifier.fit(X_train,y_train) 
-    predicted = classifier.predict(X_test) 
-    
-    avgsvm = np.append(rocvalues,accuracy_score(y_test, predicted))
-
-    #print(confusion_matrix(y_test, predicted)) 
-    #print ('Accuracy Score :',accuracy_score(y_test, predicted)) 
-    #print ('Report : ') 
-    #print (classification_report(y_test, predicted)) 
+        #print(confusion_matrix(y_test, predicted)) 
+        #print ('SVC Accuracy Score :',accuracy_score(y_test, predicted)) 
+        #print ('Report : ') 
+        #print (classification_report(y_test, predicted)) 
     print(np.average(avgknn))
     print(np.average(avgforest))
     print(np.average(avgsvm))

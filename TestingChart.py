@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from math import pi
- 
+import numpy as np
 # Set data
 
  
@@ -13,9 +13,9 @@ def SetupPlot(counters, filenames):
     'Method': ['kNN','Forest'],
     'Норма': [counters[0][0], counters[1][0]],
     'I-ая стадия': [counters[0][1], counters[1][1]],
-    'II-ая стадия': [0, 0],
-    'III-ая стадия': [0, 0],
-    'IV-ая стадия': [0, 0]
+    'II-ая стадия': [counters[0][2], counters[1][2]],
+    'III-ая стадия': [counters[0][3], counters[1][3]],
+    'IV-ая стадия': [counters[0][4], counters[1][4]]
     })
     # number of variable
     categories=list(df)[1:]
@@ -34,10 +34,12 @@ def SetupPlot(counters, filenames):
     
     # Draw one axe per variable + add labels labels yet
     plt.xticks(angles[:-1], categories)
-    
+    max = np.amax(counters)
+    if max < 5:
+        max = 6
     # Draw ylabels
     ax.set_rlabel_position(0)
-    plt.yticks([1,2,5], ["1","2","5"], color="grey", size=7)
+    plt.yticks([1,np.amin(counters),int(np.amax(counters)/2),np.amax(counters)+1], ["1",str(np.amin(counters)),str(int(np.amax(counters)/2)),str(np.amax(counters)+1)], color="grey", size=7)
     plt.ylim(0,6)
     
     
@@ -47,15 +49,15 @@ def SetupPlot(counters, filenames):
     # I don't do a loop, because plotting more than 3 methods makes the chart unreadable
     
     # Ind1
-    values=df.loc[0].drop('Method').values.flatten().tolist()
-    values += values[:1]
-    ax.plot(angles, values, linewidth=1, linestyle='solid', label="kNN")
-    ax.fill(angles, values, 'b', alpha=0.1)
+    #values=df.loc[0].drop('Method').values.flatten().tolist()
+    #values += values[:1]
+    #ax.plot(angles, values, linewidth=1, linestyle='solid', label="kNN")
+    #ax.fill(angles, values, 'b', alpha=0.1)
     
     # Ind2
     values=df.loc[1].drop('Method').values.flatten().tolist()
     values += values[:1]
-    ax.plot(angles, values, linewidth=1, linestyle='solid', label="Random Forest")
+    ax.plot(angles, values, linewidth=1, linestyle='solid', label="Количество снимков")
     ax.fill(angles, values, 'r', alpha=0.1)
     
     # Add legend

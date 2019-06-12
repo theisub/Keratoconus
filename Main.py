@@ -16,7 +16,7 @@ from TFtoOpenCV import anotherOne
 import numpy as np
 import os.path
 
-counter = np.zeros(shape=(2,2),dtype=int)
+counter = np.zeros(shape=(5,5),dtype=int)
 stages_filenames = {'Normal':[],'I':[],'II':[],'III':[],'IV':[]}
 timesRunned = 0
 
@@ -34,6 +34,19 @@ class Ui_MainWindow(object):
                     message += "\n\n\nСледующие снимки были распознаны как I-ая стадия кератоконуса:\n"
                     for item in value:
                         message += item + "\n"
+                if key == "II":
+                    message += "\n\n\nСледующие снимки были распознаны как II-ая стадия кератоконуса:\n"
+                    for item in value:
+                        message += item + "\n"
+                if key == "III":
+                    message += "\n\n\nСледующие снимки были распознаны как III-ая стадия кератоконуса:\n"
+                    for item in value:
+                        message += item + "\n"
+                if key == "IV":
+                    message += "\n\n\nСледующие снимки были распознаны как IV-ая стадия кератоконуса:\n"
+                    for item in value:
+                        message += item + "\n"
+                        
         return message
 
     def ShowMoreResult(self):
@@ -126,7 +139,9 @@ class Ui_MainWindow(object):
         a=a[1:]
  
         
-        knn_count, forest_count = ClassifyStage(a)
+        knn_count, forest_count = ClassifyStage(a,'Kerato.csv')
+        if (knn_count == 'Stage' or forest_count == 'Stage'):
+            knn_count,forest_count = ClassifyStage(a,'KeratoStages.csv')
 
         filena = os.path.basename(filename)
         for item in knn_count:
@@ -136,12 +151,29 @@ class Ui_MainWindow(object):
             if item == 'I':
                 counter[0][1] = counter[0][1] + 1
                 stages_filenames['I'].append(os.path.basename(filename))
+            if item == 'II':
+                counter[0][2] = counter[0][2] + 1
+                stages_filenames['II'].append(os.path.basename(filename))
+            if item == 'III':
+                counter[0][3] = counter[0][3] + 1
+                stages_filenames['III'].append(os.path.basename(filename))
+            if item == 'IV':
+                counter[0][4] = counter[0][4] + 1
+                stages_filenames['IV'].append(os.path.basename(filename))
+
     
         for item in forest_count:
             if item == 'N':
                 counter[1][0] = counter[1][0] + 1
             if item == 'I':
                 counter[1][1] = counter[1][1] + 1
+            if item == 'II':
+                counter[1][2] = counter[1][2] + 1
+            if item == 'III':
+                counter[1][3] = counter[1][3] + 1
+            if item == 'IV':
+                counter[1][4] = counter[1][4] + 1
+            
 
         global timesRunned
         timesRunned += 1 
