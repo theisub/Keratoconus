@@ -83,13 +83,10 @@ def ClassifyStage(a,filename):
 if __name__ == "__main__":
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 
-    # Assign colum names to the dataset
 
     names = ['coef1','coef2','coef3','coef4','coef5','coef6','coef7','coef8','Class']
 
-    #names = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'Class']
 
-    # Read dataset to pandas dataframe
     dataset = pd.read_csv('KeratoStages.csv', names=names)  
     #dataset = pd.read_csv(url,names=names)
     print(dataset.head())
@@ -117,7 +114,7 @@ if __name__ == "__main__":
         avgknn = np.append(avgknn,accuracy_score(y_test, y_pred))
 
         #print(confusion_matrix(y_test, y_pred))  
-        #print(classification_report(y_test, y_pred))  
+        print(classification_report(y_test, y_pred))  
         #print ('Accuracy Score :',accuracy_score(y_test, y_pred)) 
         #print('It is '+y_test)
         #print('kNN thinks it it ' + y_pred)
@@ -125,13 +122,11 @@ if __name__ == "__main__":
         #print("TEPER FOREST")
         #Using the random forest classifier for the prediction 
 
-        # Print the feature ranking
         #print("Feature ranking:")
 
         #for f in range(X.shape[1]):
          #   print("%d. feature %d (%f)" % (f + 1, indices[f]-1, importances[indices[f]-1]))
 
-        # Plot the feature importances of the forest
         #plt.figure()
         #plt.title("Значимость коэффициентов при классификации")
         #plt.bar(range(X.shape[1]), importances[indices-1],

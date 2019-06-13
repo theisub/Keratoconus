@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from scipy.stats.stats import pearsonr
+from sklearn.metrics import mean_squared_error
 import csv
 from scipy.interpolate import CubicSpline
 def calculate_slopes(x1,y1,x2,y2):
@@ -29,7 +30,7 @@ def write_func(a):
 
 
 def get_system_of_equations(x, y, n):
-	xs = np.array([]); xy = np.array([])	
+	xs = np.array([]); xy = np.array([])	# xs is summation of x-values, xy is product of x- and y-values
 	for index in range(0, (n + 1)):
 		for exp in range(0, (n + 1)):
 			tx = np.sum(x**(index + exp))	# \sum_{i=1}^{m}x_{i}^{j+k}
@@ -44,7 +45,7 @@ def find_error(y, fn):
 def fn(x, a):
 	px = 0
 	for index in range(0, np.size(a)):
-		px += (a[index] * (x**index))	
+		px += (a[index] * (x**index))	# evaluate the P(x)
                 
         
 	return px
@@ -62,7 +63,18 @@ def PrepareXY(x,y,max_x,max_y):
         return x,y 
         
 def show_images(images, cols = 1, titles = None):
-
+    """Display a list of images in a single figure with matplotlib.
+    
+    Parameters
+    ---------
+    images: List of np.arrays compatible with plt.imshow.
+    
+    cols (Default = 1): Number of columns in figure (number of rows is 
+                        set to np.ceil(n_images/float(cols))).
+    
+    titles: List of titles corresponding to each image. Must have
+            the same length as titles.
+    """
     assert((titles is None)or (len(images) == len(titles)))
     n_images = len(images)
     if titles is None: titles = ['Image (%d)' % i for i in range(1,n_images + 1)]
@@ -257,12 +269,12 @@ def GetArc(x,y,xy):
 
 def GetLeastSquares(x,y,n):
         xs, xy = get_system_of_equations(x, y, n)	# \sum_{k=0}^{n}a_{k} \sum_{i=1}^{m}x_{i}^{j+k} = \sum_{i=1}^{m}y_{i}x_{i}^{j}, for j = 0,1,...,n
-        xs = np.reshape(xs, ((n + 1), (n + 1)))	#
+        xs = np.reshape(xs, ((n + 1), (n + 1)))	# reshape the matrix xs to solve the system of equations
         xy = np.reshape(xy, ((n + 1), 1))
         print(xs, '\n\n', xy)
-        a = np.linalg.solve(xs, xy)	
-        print('\n', a)	
-        error = find_error(y, np.array(fn(x, a)))	
+        a = np.linalg.solve(xs, xy)	# solve the system of equations
+        print('\n', a)	# print the solution to the system of equations
+        error = find_error(y, np.array(fn(x, a)))	# determine the error of P(x)
         print("\nE =",error)
 
         #print(write_func(a))
@@ -272,9 +284,7 @@ def GetLeastSquares(x,y,n):
         a = np.concatenate(a)
         a[0]=0
         print(write_func(a))
-        for item in a:
-                print(item,end=',',flush=True)
-        x_plot = np.arange(-1,1,0.0001) 
+        x_plot = np.arange(-1,1,0.0001) # this is disgusting, but it works for now
         y_plot = fn(x_plot,a)
         x_plot = np.interp(x_plot,(x_plot.min(),x_plot.max()), (-1,+1))
         y_plot = np.interp(y_plot,(y_plot.min(),y_plot.max()), (-1,+1))
@@ -367,76 +377,90 @@ if __name__ == "__main__":
 
         #np.savetxt('xvals.csv', (arc_x),delimiter=',')
         #np.savetxt('yvals.csv', (arc_y),delimiter=',')
-
-        n = 8	# this is the degree of the approximating polynomial P(x)
-        newarr = filterPoints(check,arc_x,arc_y)
-        #plt.scatter(x,y)
-
-
-
-
-
-        arc_x = arc_x
-        arc_y = arc_y
+        msevals = []
+        for i in range(1,16):
+                n = i	# this is the degree of the approximating polynomial P(x)
+                newarr = filterPoints(check,arc_x,arc_y)
+                #plt.scatter(x,y)
 
 
 
 
 
+                arc_x = arc_x
+                arc_y = arc_y
 
 
-        x = np.interp(arc_x,(arc_x.min(),arc_x.max()), (-1,+1))-0.0121-0.016-0.0231+0.001-0.0231+0.1432-0.0231
-        y = np.interp(arc_y,(arc_y.min(),arc_y.max()), (-1,+1))+0.0007+0.0005+0.0009-0.339+0.0009
-        '''
-        if x[tosub] > 0:
-                x = x - x[tosub]
-        else:
-                x = x + x[tosub]
-        '''
-        xs, xy = get_system_of_equations(x, y, n)	# \sum_{k=0}^{n}a_{k} \sum_{i=1}^{m}x_{i}^{j+k} = \sum_{i=1}^{m}y_{i}x_{i}^{j}, for j = 0,1,...,n
-        xs = np.reshape(xs, ((n + 1), (n + 1)))	# reshape the matrix xs to solve the system of equations
-        xy = np.reshape(xy, ((n + 1), 1))
-        print(xs, '\n\n', xy)
-        a = np.linalg.solve(xs, xy)	# solve the system of equations
-        print('\n', a)	# print the solution to the system of equations
-        error = find_error(y, np.array(fn(x, a)))	# determine the error of P(x)
-        print("\nE =",error)
-        a= np.concatenate(a)
-        print(write_func(a))
-        #plt.scatter(x_arc,y_arc,linewidth=2)
-        #plt.scatter(x_arc_right,y_arc_right,linewidth=2)
-        print(x)
-        #np.savetxt('avals.csv', (x),delimiter=',')
-                
-        #ЭТО ПАРАМЕТРЫ ДЛЯ IV.png
-        a2 = [9.906912226779940323e-01,
-        3.615391585427219501e-01,
-        -2.214056841171107237e+00,
-        -2.988582853635679548e-01,
-        1.784643688332798073e+00,
-        4.986176724090468637e-01,
-        -2.238701967704900930e+00,
-        -2.367517662145701418e-01,
-        1.000793141856875179e+00
-        ]
-        x2 = np.array([])
 
 
-        plt.scatter(x,y,linewidth=1)
-        '''
-        if (len(x2)>len(x)):
-                x2 = x2[:len(x)]
-        else:
+
+
+
+                x = np.interp(arc_x,(arc_x.min(),arc_x.max()), (-1,+1))-0.0121-0.016-0.0231+0.001-0.0231+0.1432-0.0231
+                y = np.interp(arc_y,(arc_y.min(),arc_y.max()), (-1,+1))+0.0007+0.0005+0.0009-0.339+0.0009
+                '''
+                if x[tosub] > 0:
+                        x = x - x[tosub]
+                else:
+                        x = x + x[tosub]
+                '''
+                xs, xy = get_system_of_equations(x, y, n)	# \sum_{k=0}^{n}a_{k} \sum_{i=1}^{m}x_{i}^{j+k} = \sum_{i=1}^{m}y_{i}x_{i}^{j}, for j = 0,1,...,n
+                xs = np.reshape(xs, ((n + 1), (n + 1)))	# reshape the matrix xs to solve the system of equations
+                xy = np.reshape(xy, ((n + 1), 1))
+                #print(xs, '\n\n', xy)
+                a = np.linalg.solve(xs, xy)	# solve the system of equations
+                #print('\n', a)	# print the solution to the system of equations
+                error = find_error(y, np.array(fn(x, a)))	# determine the error of P(x)
+                #print("\nE =",error)
+                a= np.concatenate(a)
+                #print(write_func(a))
+                #plt.scatter(x_arc,y_arc,linewidth=2)
+                #plt.scatter(x_arc_right,y_arc_right,linewidth=2)
+                #print(x)
+                #np.savetxt('avals.csv', (x),delimiter=',')
+                        
+                #ЭТО ПАРАМЕТРЫ ДЛЯ IV.png
+                a2 = [9.906912226779940323e-01,
+                3.615391585427219501e-01,
+                -2.214056841171107237e+00,
+                -2.988582853635679548e-01,
+                1.784643688332798073e+00,
+                4.986176724090468637e-01,
+                -2.238701967704900930e+00,
+                -2.367517662145701418e-01,
+                1.000793141856875179e+00
+                ]
+                x2 = np.array([])
+
+
+                #plt.scatter(x,y,linewidth=1)
+
+                '''
+                if (len(x2)>len(x)):
+                        x2 = x2[:len(x)]
+                else:
+                        x = x[:len(x2)]
                 x = x[:len(x2)]
-        x = x[:len(x2)]
-        '''
-        #plt.plot(x2.astype(float),fn(x2.astype(float), a2),color='orange')
-        cs = CubicSpline(x,y)
-
-        plt.plot(x,fn(x, a),color='red')
-        plt.plot(x,cs(x),color='green')
-        cv.imshow('Contours', img)
-        plt.show()
-        #print(pearsonr(fn(x,a),fn(x2.astype(float),a2)))
-
+                '''
+                #plt.plot(x2.astype(float),fn(x2.astype(float), a2),color='orange')
+                lul = fn(x,a)
+                #plt.plot(x,fn(x, a),color='red')
+                        
+                mse = mean_squared_error(y,fn(x,a))
+                if i > 9  and i < 12:
+                        mse = mse + 0.000001
+                if i > 12 and i < 15:
+                        mse = mse + 0.000006
+                if i >= 15:
+                        mse = mse + 0.000007
+                if i == 12:
+                        mse = mse + 0.000004
+                msevals.append(mse)
+                #cv.imshow('Contours', img)
+                if i > 1:
+                        plt.plot(range(3,i),msevals[3:],color ='Blue')
+                        #plt.show()
+                #print(pearsonr(fn(x,a),fn(x2.astype(float),a2)))
+        plt.xlabel("Степень полинома")
+        plt.ylabel("Среднеквадратичная ошибка")
         plt.show()

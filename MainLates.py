@@ -18,7 +18,6 @@ import os.path
 
 counter = np.zeros(shape=(5,5),dtype=int)
 stages_filenames = {'Normal':[],'I':[],'II':[],'III':[],'IV':[]}
-stages_counter = [0,0,0,0,0]
 timesRunned = 0
 
 class Ui_MainWindow(object):
@@ -116,100 +115,79 @@ class Ui_MainWindow(object):
     def importImage(self,MainWindow):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(None,"Выберите изображение","", "Image Files (*.png *.jpg *.jpeg *.bmp)")
         tempfile = 'currentroi.jpg'
-        try:
-            if filename:
-                pixmap = QtGui.QPixmap(filename)
-                pixmap = pixmap.scaled(self.OriginalImage.width(), self.OriginalImage.height(), QtCore.Qt.KeepAspectRatio)
-                self.OriginalImage.setPixmap(pixmap)
-                self.OriginalImage.setAlignment(QtCore.Qt.AlignCenter)
-            filename,tempfile = GetROI(filename, tempfile)
-            threshold_img, original_img = GetThresholdImage(tempfile)
-            newpixmap, contours =  GetContours(threshold_img,original_img)
-            #newpixmap =  QtGui.QPixmap('Ik.png')
-            h,w,channel = newpixmap.shape
-            bytesPerLine =  3 * w
-            qImg = QtGui.QImage(newpixmap.data,w,h,bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
-            pixmap01= QtGui.QPixmap.fromImage(qImg)
-            self.NewImage.setPixmap(pixmap01)
-            self.NewImage.setAlignment(QtCore.Qt.AlignCenter)
-            x,y,xy = PrepareContoursForArc(contours)
-            arc_x, arc_y = GetArc(x,y,xy)
-            n = 8 # polynomial degree
-            _, max_x,max_y = GetLeastSquares(arc_x,arc_y,n)
-            arc_x,arc_y = PrepareXY(arc_x,arc_y,max_x,max_y)
-            a,_,_ = GetLeastSquares(arc_x,arc_y,n)
-            a=a[1:]
-    
-            
-            knn_count, forest_count = ClassifyStage(a,'Kerato.csv')
-            if (forest_count == 'Stage'):
-                knn_count,forest_count = ClassifyStage(a,'KeratoStages.csv')
-
-            filena = os.path.basename(filename)
-            for item in knn_count:
-                if item == 'N':
-                    counter[0][0] = counter[0][0] + 1
-                    #stages_filenames['Normal'].append(os.path.basename(filename))
-                if item == 'I':
-                    counter[0][1] = counter[0][1] + 1
-                    #stages_filenames['I'].append(os.path.basename(filename))
-                if item == 'II':
-                    counter[0][2] = counter[0][2] + 1
-                    #stages_filenames['II'].append(os.path.basename(filename))
-                if item == 'III':
-                    counter[0][3] = counter[0][3] + 1
-                    #stages_filenames['III'].append(os.path.basename(filename))
-                if item == 'IV':
-                    counter[0][4] = counter[0][4] + 1
-                    #stages_filenames['IV'].append(os.path.basename(filename))
-
+        if filename:
+            pixmap = QtGui.QPixmap(filename)
+            pixmap = pixmap.scaled(self.OriginalImage.width(), self.OriginalImage.height(), QtCore.Qt.KeepAspectRatio)
+            self.OriginalImage.setPixmap(pixmap)
+            self.OriginalImage.setAlignment(QtCore.Qt.AlignCenter)
+        filename,tempfile = GetROI(filename, tempfile)
+        threshold_img, original_img = GetThresholdImage(tempfile)
+        newpixmap, contours =  GetContours(threshold_img,original_img)
+        #newpixmap =  QtGui.QPixmap('Ik.png')
+        h,w,channel = newpixmap.shape
+        bytesPerLine =  3 * w
+        qImg = QtGui.QImage(newpixmap.data,w,h,bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
+        pixmap01= QtGui.QPixmap.fromImage(qImg)
+        self.NewImage.setPixmap(pixmap01)
+        self.NewImage.setAlignment(QtCore.Qt.AlignCenter)
+        x,y,xy = PrepareContoursForArc(contours)
+        arc_x, arc_y = GetArc(x,y,xy)
+        n = 8 # polynomial degree
+        _, max_x,max_y = GetLeastSquares(arc_x,arc_y,n)
+        arc_x,arc_y = PrepareXY(arc_x,arc_y,max_x,max_y)
+        a,_,_ = GetLeastSquares(arc_x,arc_y,n)
+        a=a[1:]
+ 
         
-            for item in forest_count:
-                if item == 'N':
-                    counter[1][0] = counter[1][0] + 1
-                    stages_filenames['Normal'].append(os.path.basename(filename))
-                    stages_counter[0] += 1
-                if item == 'I':
-                    counter[1][1] = counter[1][1] + 1
-                    stages_filenames['I'].append(os.path.basename(filename))
-                    stages_counter[1] += 1
-                if item == 'II':
-                    counter[1][2] = counter[1][2] + 1
-                    stages_filenames['II'].append(os.path.basename(filename))
-                    stages_counter[2] += 1
-                if item == 'III':
-                    counter[1][3] = counter[1][3] + 1
-                    stages_filenames['III'].append(os.path.basename(filename))
-                    stages_counter[3] += 1
-                if item == 'IV':
-                    counter[1][4] = counter[1][4] + 1
-                    stages_filenames['IV'].append(os.path.basename(filename))
-                    stages_counter[4] += 1
-                
+        knn_count, forest_count = ClassifyStage(a,'Kerato.csv')
+        if (knn_count == 'Stage' or forest_count == 'Stage'):
+            knn_count,forest_count = ClassifyStage(a,'KeratoStages.csv')
 
-            global timesRunned
-            timesRunned += 1 
-            currentmax = np.argmax(stages_counter)
-            if timesRunned < 2:
-                self.resultsText.setText('Рекомендуется загрузить более одного снимка, в ином случае результат может быть недостоверен.')
-            elif timesRunned >= 2:
-                if (currentmax == 0 and np.amax(stages_counter[:1])==0):
-                    self.resultsText.setText('На основе снимков роговица пациента скорее всего не имеет отклонений от нормы.')
-                if (currentmax == 0 and np.amax(stages_counter[:1])>0):
-                    self.resultsText.setText('На основе снимков роговица пациента возможно имеет признаки кератоконуса, рекомендуется внимательно изучить снимки, нажав на кнопку "Подробнее о результатах". ')
-                if (currentmax == 1):
-                    self.resultsText.setText('На основе снимков роговица пациента с большой вероятностью имеет I-ую стадию кератоконус.')
-                if (currentmax == 2):
-                    self.resultsText.setText('На основе снимков роговица пациента с большой вероятностью имеет II-ую стадию кератоконус.')
-                if (currentmax == 3):
-                    self.resultsText.setText('На основе снимков роговица пациента с большой вероятностью имеет III-ую стадию кератоконус.')
-                if (currentmax == 4):
-                    self.resultsText.setText('На основе снимков роговица пациента с большой вероятностью имеет IV-ую стадию кератоконус.')
-                else:
-                    self.resultsText.setText('На основе снимков роговица пациента с большой вероятностью имеет признаки кератоконуса, рекомендуется внимательно изучить снимки, нажав на кнопку "Подробнее о результатах"')
-            print(a)
-        except Exception:
-            print('Произошла ошибка, возможно вы выбрали не совсем корректное изображение')
+        filena = os.path.basename(filename)
+        for item in knn_count:
+            if item == 'N':
+                counter[0][0] = counter[0][0] + 1
+                stages_filenames['Normal'].append(os.path.basename(filename))
+            if item == 'I':
+                counter[0][1] = counter[0][1] + 1
+                stages_filenames['I'].append(os.path.basename(filename))
+            if item == 'II':
+                counter[0][2] = counter[0][2] + 1
+                stages_filenames['II'].append(os.path.basename(filename))
+            if item == 'III':
+                counter[0][3] = counter[0][3] + 1
+                stages_filenames['III'].append(os.path.basename(filename))
+            if item == 'IV':
+                counter[0][4] = counter[0][4] + 1
+                stages_filenames['IV'].append(os.path.basename(filename))
+
+    
+        for item in forest_count:
+            if item == 'N':
+                counter[1][0] = counter[1][0] + 1
+            if item == 'I':
+                counter[1][1] = counter[1][1] + 1
+            if item == 'II':
+                counter[1][2] = counter[1][2] + 1
+            if item == 'III':
+                counter[1][3] = counter[1][3] + 1
+            if item == 'IV':
+                counter[1][4] = counter[1][4] + 1
+            
+
+        global timesRunned
+        timesRunned += 1 
+
+        if timesRunned < 2:
+            self.resultsText.setText('Рекомендуется загрузить более одного снимка, в ином случае результат может быть недостоверен.')
+        elif timesRunned >= 2:
+            if (counter[0][0] > 2 * counter[0][1]):
+                self.resultsText.setText('На основе снимков роговица пациента скорее всего не имеет отклонений от нормы.')
+            if (counter[0][0] == counter[0][1]):
+                self.resultsText.setText('На основе снимков роговица пациента возможно имеет I-ую стадию кератоконуса, рекомендуется внимательно изучить снимки, нажав на кнопку "Подробнее о результатах". ')
+            if (counter[0][1] > counter[0][0]):
+                self.resultsText.setText('На основе снимков роговица пациента с большой вероятностью имеет I-ую стадию кератоконус.')
+        print(a)
 
 
     def ShowRadarChart(self,MainWindow):
